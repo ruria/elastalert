@@ -96,6 +96,8 @@ class ElastAlerter():
         self.scroll_keepalive = self.conf['scroll_keepalive']
         self.rules = self.conf['rules']
         self.writeback_index = self.conf['writeback_index']
+        # cargo los indices donde voy a leer si ya se ejecuto la regla:
+        self.readback_index = self.conf['readback_index']
         self.run_every = self.conf['run_every']
         self.alert_time_limit = self.conf['alert_time_limit']
         self.old_query_limit = self.conf['old_query_limit']
@@ -471,7 +473,7 @@ class ElastAlerter():
                  'sort': {'@timestamp': {'order': 'desc'}}}
         try:
             if self.writeback_es:
-                res = self.writeback_es.search(index=self.writeback_index, doc_type='elastalert_status',
+                res = self.writeback_es.search(index=self.readback_index, doc_type='elastalert_status',
                                                size=1, body=query, _source_include=['endtime', 'rule_name'])
                 if res['hits']['hits']:
                     endtime = ts_to_dt(res['hits']['hits'][0]['_source']['endtime'])
@@ -1068,7 +1070,7 @@ class ElastAlerter():
                  'sort': {'alert_time': {'order': 'asc'}}}
         if self.writeback_es:
             try:
-                res = self.writeback_es.search(index=self.writeback_index,
+                res = self.writeback_es.search(index=self.readback_index,
                                                doc_type='elastalert',
                                                body=query,
                                                size=1000)
@@ -1117,7 +1119,7 @@ class ElastAlerter():
 
                 # Delete it from the index
                 try:
-                    self.writeback_es.delete(index=self.writeback_index,
+                    self.writeback_es.delete(index=self.readback_index,
                                              doc_type='elastalert',
                                              id=_id)
                 except:  # TODO: Give this a more relevant exception, try:except: is evil.
@@ -1275,7 +1277,7 @@ class ElastAlerter():
 
         if self.writeback_es:
             try:
-                res = self.writeback_es.search(index=self.writeback_index, doc_type='silence',
+                res = self.writeback_es.search(index=self.readback_index, doc_type='silence',
                                                size=1, body=query, _source_include=['until', 'exponent'])
             except ElasticsearchException as e:
                 self.handle_error("Error while querying for alert silence status: %s" % (e), {'rule': rule_name})

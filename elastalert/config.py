@@ -419,8 +419,11 @@ def load_rules(args):
     
     # Warn if use_strf_index is used with %y, %M or %D
     # (%y = short year, %M = minutes, %D = full date)
+    
+    # añado el indice donde quiero que me busque las cosas que escribió: 'writeback_index*'
+    conf['readback_index']=conf['writeback_index'] + '*'
 
-    if (conf.get('writeback_index_fmt') and conf.get('writeback_index_fmt')):
+    if (conf.get('writeback_index') and conf.get('writeback_index_fmt')):
         try:
             conf['writeback_index']=conf.get('writeback_index') + '%s' % (now.strftime(conf.get('writeback_index_fmt')))    
         except SyntaxError:
