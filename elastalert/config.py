@@ -422,13 +422,6 @@ def load_rules(args):
     
     # añado el indice donde quiero que me busque las cosas que escribió: 'writeback_index*'
     conf['readback_index']=conf['writeback_index'] + '*'
-
-    if (conf.get('writeback_index') and conf.get('writeback_index_fmt')):
-        try:
-            conf['writeback_index']=conf.get('writeback_index') + '%s' % (now.strftime(conf.get('writeback_index_fmt')))    
-        except SyntaxError:
-            raise SyntaxError('error with the format of writeback_index_fmt in the config.yaml')
-
     conf['rules'] = rules
     return conf
 
