@@ -85,7 +85,7 @@ def main():
     old_index = (args.old_index if args.old_index is not None
                  else raw_input('Name of existing index to copy? (Default None) '))
 
-    crear_indice(index, es)
+    create_index(index, es)
     print('New index %s created' % index)
 
     if old_index:
@@ -96,7 +96,7 @@ def main():
     print('Done!')
 
 
-def crear_indice(indice, es):
+def create_index(indice, es):
     silence_mapping = {'silence': {'properties': {'rule_name': {'index': 'not_analyzed', 'type': 'string'},
                                                   'until': {'type': 'date', 'format': 'dateOptionalTime'},
                                                   '@timestamp': {'format': 'dateOptionalTime', 'type': 'date'}}}}

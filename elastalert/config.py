@@ -23,8 +23,6 @@ from util import ts_to_dt_with_format
 from util import unix_to_dt
 from util import unixms_to_dt
 
-now = datetime.datetime.now()
-
 # schema for rule yaml
 rule_schema = jsonschema.Draft4Validator(yaml.load(open(os.path.join(os.path.dirname(__file__), 'schema.yaml'))))
 
@@ -420,7 +418,7 @@ def load_rules(args):
     # Warn if use_strf_index is used with %y, %M or %D
     # (%y = short year, %M = minutes, %D = full date)
     
-    # añado el indice donde quiero que me busque las cosas que escribió: 'writeback_index*'
+    # Set index name for searching
     conf['readback_index']=conf['writeback_index'] + '*'
     conf['rules'] = rules
     return conf

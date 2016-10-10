@@ -41,7 +41,7 @@ from util import ts_add
 from util import ts_now
 from util import ts_to_dt
 from util import unix_to_dt
-from create_index import crear_indice
+from create_index import create_index
 
 
 class ElastAlerter():
@@ -71,7 +71,7 @@ class ElastAlerter():
         parser.add_argument('--pin_rules', action='store_true', dest='pin_rules', help='Stop ElastAlert from monitoring config file changes')
         parser.add_argument('--es_debug', action='store_true', dest='es_debug', help='Enable verbose logging from Elasticsearch queries')
         parser.add_argument('--es_debug_trace', action='store', dest='es_debug_trace', help='Enable logging from Elasticsearch queries as curl command. Queries will be logged to file')
-        parser.add_argument('--autocreate', default=False, help='Autocreated the index in Elasticsearch')                
+        parser.add_argument('--create', default=False, help='Create indexes as needed in Elasticsearch')                
         self.args = parser.parse_args(args)
 
     def __init__(self, args):
@@ -98,9 +98,7 @@ class ElastAlerter():
         self.scroll_keepalive = self.conf['scroll_keepalive']
         self.rules = self.conf['rules']
         self.writeback_index = self.conf['writeback_index']
-        # cargo los indices donde voy a leer si ya se ejecuto la regla:
         self.readback_index = self.conf['readback_index']
-        # Cargamos el formato del indice que queremos:
         self.writeback_index_fmt = self.conf['writeback_index_fmt']
         self.run_every = self.conf['run_every']
         self.alert_time_limit = self.conf['alert_time_limit']
@@ -119,8 +117,8 @@ class ElastAlerter():
         self.rule_hashes = get_rule_hashes(self.conf, self.args.rule)
         self.starttime = self.args.start
         self.disabled_rules = []
-        self.indices_creados = {}
-        self.autocreate=self.args.autocreate
+        self.created_indexes = {}
+        self.create=self.args.create
 
         self.es_conn_config = self.build_es_conn_config(self.conf)
 
@@ -233,23 +231,19 @@ class ElastAlerter():
         return query
    
     def writeback_format(self, writeback_index, writeback_index_fmt, writeback_es):
-        """funcion que crea el nombre del indice donde debe escribir la regla (cambia con el paso de los dias).
+        """Config index name with format template
         """
         if writeback_index_fmt!=None:
             writeback_index=writeback_index + '%s' % (time.strftime(writeback_index_fmt))
         elif writeback_index_fmt==None:
             writeback_index=writeback_index
-        #creamos el indice: primero miramos en un diccionario si está creado, si no, le creamos y avisamos 
-        # tanto de que ya estaba creado como de que no está creado.
-        if writeback_index in self.indices_creados:
-            elastalert_logger.info('El indice ya fue creado a lo largo de la ejecucion de esta alerta')
+        if writeback_index in self.created_indexes:
+            elastalert_logger.info('Index already exists.')
         else:
-            # creamos el indice si se quiere:
-            if self.autocreate==True:
-                crear_indice(writeback_index, writeback_es)
+            if self.create==True:
+                create_index(writeback_index, writeback_es)
                 elastalert_logger.info('New index %s created' % writeback_index)
-                # una vez creado añadimos el nombre al diccionario:
-                self.indices_creados[writeback_index]=True                
+                self.created_indexes[writeback_index]=True                
         return writeback_index    
 
     def get_terms_query(self, query, size, field):
