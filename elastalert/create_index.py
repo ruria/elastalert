@@ -88,6 +88,24 @@ def main():
         url_prefix=url_prefix,
         send_get_body_as=send_get_body_as)
 
+
+    
+    index = args.index if args.index is not None else raw_input('New index name? (Default elastalert_status) ')
+    old_index = (args.old_index if args.old_index is not None
+                 else raw_input('Name of existing index to copy? (Default None) '))
+
+    create_index(index, es)
+    print('New index %s created' % index)
+
+    if old_index:
+        print("Copying all data from old index '{0}' to new index '{1}'".format(old_index, index))
+        # Use the defaults for chunk_size, scroll, scan_kwargs, and bulk_kwargs
+        elasticsearch.helpers.reindex(es, old_index, index)
+
+    print('Done!')
+
+
+def create_index(indice, es):
     silence_mapping = {'silence': {'properties': {'rule_name': {'index': 'not_analyzed', 'type': 'string'},
                                                   'until': {'type': 'date', 'format': 'dateOptionalTime'},
                                                   '@timestamp': {'format': 'dateOptionalTime', 'type': 'date'}}}}
@@ -104,13 +122,10 @@ def main():
                                                        'aggregate_id': {'index': 'not_analyzed', 'type': 'string'}}}}
     error_mapping = {'elastalert_error': {'properties': {'data': {'type': 'object', 'enabled': False},
                                                          '@timestamp': {'format': 'dateOptionalTime', 'type': 'date'}}}}
-
-    index = args.index if args.index is not None else raw_input('New index name? (Default elastalert_status) ')
+                                                         
+    index=indice
     if not index:
         index = 'elastalert_status'
-
-    old_index = (args.old_index if args.old_index is not None
-                 else raw_input('Name of existing index to copy? (Default None) '))
 
     es_index = IndicesClient(es)
     if es_index.exists(index):
@@ -125,14 +140,7 @@ def main():
     es.indices.put_mapping(index=index, doc_type='silence', body=silence_mapping)
     es.indices.put_mapping(index=index, doc_type='elastalert_error', body=error_mapping)
     es.indices.put_mapping(index=index, doc_type='past_elastalert', body=past_mapping)
-    print('New index %s created' % index)
-
-    if old_index:
-        print("Copying all data from old index '{0}' to new index '{1}'".format(old_index, index))
-        # Use the defaults for chunk_size, scroll, scan_kwargs, and bulk_kwargs
-        elasticsearch.helpers.reindex(es, old_index, index)
-
-    print('Done!')
+    return index
 
 if __name__ == '__main__':
     main()
