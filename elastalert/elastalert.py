@@ -71,7 +71,7 @@ class ElastAlerter():
         parser.add_argument('--pin_rules', action='store_true', dest='pin_rules', help='Stop ElastAlert from monitoring config file changes')
         parser.add_argument('--es_debug', action='store_true', dest='es_debug', help='Enable verbose logging from Elasticsearch queries')
         parser.add_argument('--es_debug_trace', action='store', dest='es_debug_trace', help='Enable logging from Elasticsearch queries as curl command. Queries will be logged to file')
-        parser.add_argument('--create', default=False, help='Create indexes as needed in Elasticsearch')                
+        parser.add_argument('--create', default=True, help='Create indexes as needed in Elasticsearch (Default: True)')                
         self.args = parser.parse_args(args)
 
     def __init__(self, args):
