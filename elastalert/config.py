@@ -393,6 +393,7 @@ def load_rules(args):
     conf.setdefault('scroll_keepalive', '30s')
     conf.setdefault('disable_rules_on_error', True)
     conf.setdefault('scan_subdirectories', True)
+    conf.setdefault('writeback_index_fmt',None)
 
     # Convert run_every, buffer_time into a timedelta object
     try:

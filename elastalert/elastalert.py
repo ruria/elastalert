@@ -240,8 +240,7 @@ class ElastAlerter():
         """
         if writeback_index_fmt!=None:
             writeback_index=writeback_index + '%s' % (time.strftime(writeback_index_fmt))
-        elif writeback_index_fmt==None:
-            writeback_index=writeback_index
+
         if writeback_index in self.created_indexes:
             elastalert_logger.info('Index already exists.')
         else:
