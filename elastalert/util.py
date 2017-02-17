@@ -245,8 +245,12 @@ def cronite_datetime_to_timestamp(self, d):
 
 
 def add_raw_postfix(field):
-    if not field.endswith('.raw'):
-        field += '.raw'
+    if self.is_five():
+        end = '.keyword'
+    else:
+        end =  '.raw'
+    if not field.endswith(end):
+        field += end
     return field
 
 
