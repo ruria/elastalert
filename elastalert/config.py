@@ -55,11 +55,13 @@ alerts_mapping = {
     'hipchat': alerts.HipChatAlerter,
     'slack': alerts.SlackAlerter,
     'pagerduty': alerts.PagerDutyAlerter,
+    'exotel': alerts.ExotelAlerter,
     'twilio': alerts.TwilioAlerter,
     'victorops': alerts.VictorOpsAlerter,
     'telegram': alerts.TelegramAlerter,
     'gitter': alerts.GitterAlerter,
-    'servicenow': alerts.ServiceNowAlerter
+    'servicenow': alerts.ServiceNowAlerter,
+    'simple': alerts.SimplePostAlerter
 }
 # A partial ordering of alert types. Relative order will be preserved in the resulting alerts list
 # For example, jira goes before email so the ticket # will be added to the resulting email.
@@ -91,12 +93,30 @@ def load_configuration(filename, conf, args=None):
     :param conf: The global configuration dictionary, used for populating defaults.
     :return: The rule configuration, a dictionary.
     """
-    try:
-        rule = yaml_loader(filename)
-    except yaml.scanner.ScannerError as e:
-        raise EAException('Could not parse file %s: %s' % (filename, e))
 
-    rule['rule_file'] = filename
+    rule = {
+        'rule_file': filename
+    }
+
+    while True:
+        try:
+            loaded = yaml_loader(filename)
+        except yaml.scanner.ScannerError as e:
+            raise EAException('Could not parse file %s: %s' % (filename, e))
+
+        # Special case for merging filters - if both files specify a filter merge (AND) them
+        if 'filter' in rule and 'filter' in loaded:
+            rule['filter'] = loaded['filter'] + rule['filter']
+
+        loaded.update(rule)
+        rule = loaded
+        if 'import' in rule:
+            # Find the path of the next file.
+            filename = os.path.join(os.path.dirname(filename), rule['import'])
+            del(rule['import'])  # or we could go on forever!
+        else:
+            break
+
     load_options(rule, conf, args)
     load_modules(rule, args)
     return rule
