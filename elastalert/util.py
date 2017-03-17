@@ -244,10 +244,11 @@ def cronite_datetime_to_timestamp(self, d):
     return total_seconds((d - datetime.datetime(1970, 1, 1)))
 
 
-def add_raw_postfix(field):
-    if self.is_five():
+def add_raw_postfix(field, is_five):
+    if is_five:
         end = '.keyword'
     else:
+        end = '.raw'
         end =  '.raw'
     if not field.endswith(end):
         field += end

@@ -338,11 +338,11 @@ class ElastAlerter():
         if qk:
             filter_key = rule['query_key']
             if self.is_five():
-                end='.keyword'
+                end = '.keyword'
             else:
-                end='.raw'
+                end = '.raw'
             if rule.get('raw_count_keys', True) and not rule['query_key'].endswith(end) and not self.is_five():
-                filter_key = add_raw_postfix(filter_key)
+                filter_key = add_raw_postfix(filter_key, self.is_five())
             rule_filter.extend([{'term': {filter_key: qk}}])
         base_query = self.get_query(rule_filter, starttime, endtime, timestamp_field=rule['timestamp_field'], sort=False, to_ts_func=rule['dt_to_ts'], five=self.is_five())
         if size is None:
