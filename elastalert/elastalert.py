@@ -1066,7 +1066,8 @@ class ElastAlerter():
         next_run = datetime.datetime.utcnow() + self.run_every
 
         for rule in self.rules:
-            if not checkRunTime(rule.get('run_time'), datetime.datetime.now()):
+            if not checkRunTime(rule.get('run_time'), datetime.datetime.now(), rule.get("run_time_format") or "%H:%M:%S",
+                                rule.get("run_date_format") or "%d/%m/%Y"):
                 elastalert_logger.info("Not ran %s because run_time configuration." % (rule['name']))
                 continue
             # Set endtime based on the rule's delay

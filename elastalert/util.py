@@ -366,19 +366,32 @@ def parse_deadline(value):
     return ts_now() + duration
 
 
-def checkRunTime(runTime, currentDatetime=ts_now(), runTimeFormat="%H:%M:%S"):
+def checkRunTime(runTime, currentDatetime=ts_now(), runTimeFormat="%H:%M:%S", rundateFormat="%d/%m/%Y"):
     if not runTime:
         return True
     days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
     currentDayWeek = currentDatetime.weekday()
     currentTime = currentDatetime.time()
+
     if not isinstance(runTime, list):
         runTime = [runTime]
+
+    currentDate = datetime.date.strftime(currentDatetime, rundateFormat)
+
     for runTimeRule in runTime:
         ruleWeekday = runTimeRule.get('week_day')
-
+        # Check day is included
         if ruleWeekday and not days[currentDayWeek] in ruleWeekday:
             continue
+        # Check date is not excluded
+        excludeArray = runTimeRule.get("exclude") or []
+        if runTimeRule.get("exclude") and not isinstance(runTimeRule.get("exclude"), list):
+            excludeArray = [runTimeRule.get("exclude")]
+        for aDate in excludeArray:
+            check = datetime.datetime.strptime(aDate, rundateFormat)
+            if check.strftime(rundateFormat) == currentDate:
+                return False
+
         start = datetime.datetime.strptime(runTimeRule['start'], runTimeFormat).time()
         end = datetime.datetime.strptime(runTimeRule['end'], runTimeFormat).time()
         if start <= currentTime <= end:
