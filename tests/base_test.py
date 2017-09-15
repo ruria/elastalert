@@ -1236,3 +1236,16 @@ def test_not_run_time():
     }]
     assert checkRunTime(runTime, datetime.datetime(2000, 1, 1, 20, 30, 00))
     assert not checkRunTime(runTime, datetime.datetime(2000, 1, 1, 19, 30, 00))
+
+
+def test_run_time_exclude():
+        # Add run_time info
+    runTime = {
+        "week_day": ["mon", "tue"],
+        "start": "08:00:00",
+        "end": "18:00:00",
+        "exclude": ["10/10/2017", "10/09/2017"]
+    }
+    assert checkRunTime(runTime, datetime.datetime(2017, 9, 11, 9, 00, 00))
+    runTime['exclude'] = "11/09/2017"
+    assert not checkRunTime(runTime, datetime.datetime(2017, 9, 11, 9, 00, 00))
