@@ -1077,7 +1077,8 @@ class ElastAlerter():
                         'hits': 0,
                         '@timestamp': ts_now(),
                         'time_taken': 0,
-                        'message': "Not ran because run_time configuration"}
+                        'message': "Not ran because run_time configuration",
+                        'description': rule.get('description', '')}
                 self.writeback('elastalert_status', body)
                 rule['previous_endtime'] = ts_now()
                 continue
